@@ -40,8 +40,8 @@ def main():
         except openvr.error_code.TrackedCameraError as e:
             print(f"TrackedCameraError: {e}")
         
-        # Espera un tiempo antes de intentar capturar el siguiente fotograma
-        time.sleep(0.1)  # Espera aproximadamente 16 ms (60 FPS)
+        
+        time.sleep(0.016)  
 
 
     
