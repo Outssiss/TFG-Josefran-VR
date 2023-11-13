@@ -1,20 +1,5 @@
-modes = lovr.headset.getPassthroughModes()
+texture = lovr.graphics.newTexture("camera_der_dist.png", {type = "2d", usage = {render}, label = "nose"})
 
-
-
-
-function dump(o)
-    if type(o) == 'table' then
-       local s = '{ '
-       for k,v in pairs(o) do
-          if type(k) ~= 'number' then k = '"'..k..'"' end
-          s = s .. '['..k..'] = ' .. dump(v) .. ','
-       end
-       return s .. '} '
-    else
-       return tostring(o)
-    end
- end
-
-print(dump(modes))
-
+function lovr.draw(pass)
+    pass:draw(texture)
+end
