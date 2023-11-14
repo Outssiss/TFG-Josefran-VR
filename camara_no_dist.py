@@ -28,9 +28,9 @@ def main():
         try:
             result = camera.getVideoStreamFrameBuffer(camera_handle, frame_type, frame_buffer, frame_size[2])
             original_matrix = np.frombuffer(frame_buffer, dtype=np.uint8)
-            matriz_reshaped = np.reshape(original_matrix, (1, 2252160, 4))
-            matriz_reshaped[:, :, 3] = 255
-            matriz_reshaped = np.reshape(matriz_reshaped, (2, 1126080, 4))
+            
+            #matriz_reshaped[:, :, 3] = 255
+            matriz_reshaped = np.reshape(original_matrix, (2, 1126080, 4))
             imagen_ambas_no_dist = Image.frombuffer("RGBA", (1224,1840), matriz_reshaped, "raw")
             imagen_derecha_no_dist = Image.frombuffer("RGBA", (1224,920), matriz_reshaped[0], "raw")
             imagen_izquierda_no_dist = Image.frombuffer("RGBA", (1224,920), matriz_reshaped[1], "raw")

@@ -21,7 +21,7 @@ def main():
     
     glfw.init()
     glfw.window_hint(glfw.SAMPLES, 4)
-    window = glfw.create_window(640, 320, 'hello_vr', None, None)
+    window = glfw.create_window(1, 1, 'hello_vr', None, None)
     glfw.make_context_current(window)
     
     hmd = openvr.init(openvr.VRApplication_Scene)
@@ -36,7 +36,7 @@ def main():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     image_izq = pg.image.load("camera_izq_no_dist.png").convert_alpha()
     image_width_izq,image_height_izq = image_izq.get_rect().size
-    img_data_izq = pg.image.tostring(image_izq,'RGBA')
+    img_data_izq = pg.image.tostring(image_izq,'RGBA',1)
     glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image_width_izq,image_height_izq,0,GL_RGBA,GL_UNSIGNED_BYTE,img_data_izq)
     glGenerateMipmap(GL_TEXTURE_2D)
     glActiveTexture(GL_TEXTURE0)
@@ -55,7 +55,7 @@ def main():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     image_der = pg.image.load("camera_der_no_dist.png").convert_alpha()
     image_width_der,image_height_der = image_der.get_rect().size
-    img_data_der = pg.image.tostring(image_der,'RGBA')
+    img_data_der = pg.image.tostring(image_der,'RGBA', 1)
     glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image_width_der,image_height_der,0,GL_RGBA,GL_UNSIGNED_BYTE,img_data_der)
     glGenerateMipmap(GL_TEXTURE_2D)
     glActiveTexture(GL_TEXTURE1)
@@ -76,21 +76,7 @@ def main():
         except openvr.error_code.CompositorError_DoNotHaveFocus:
             pass  # First frame fails because waitGetPoses has not been called yet
     
-        poses, _ = openvr.VRCompositor().waitGetPoses(poses, None)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    
-    
-    
+        poses, _ = openvr.VRCompositor().waitGetPoses(poses, None)    
     
 if __name__ == "__main__":
     main()
