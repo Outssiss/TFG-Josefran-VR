@@ -1,3 +1,4 @@
 {
-    "C_Cpp.default.compilerPath": "d:\\msys2\\ucrt64\\bin\\g++.exe"
+    "C_Cpp.default.compilerPath": "d:\\msys2\\ucrt64\\bin\\g++.exe",
+    "cmake.sourceDirectory": "D:/TFG Josefran/openvr"
 }

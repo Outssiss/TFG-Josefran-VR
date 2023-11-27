@@ -22,7 +22,7 @@ class VRSAM:
         self.frame_buffer = (ctypes.c_uint8 * self.frame_size[2])()
         self.frame_header = openvr.VRTextureBounds_t()
 
-    def startCameraRecording(self, q ,saveFile=False):
+    def startCameraRecording(self,saveFile=False):
         while True:
             try:
                 result = self.camera.getVideoStreamFrameBuffer(self.camera_handle, self.frame_type, self.frame_buffer, self.frame_size[2])
@@ -30,7 +30,7 @@ class VRSAM:
                                               self.frame_size[:2],
                                               "RGBA")
                 
-                self.doOpenGLStuff(q)
+                self.doOpenGLStuff()
                 if saveFile: 
                     pg.image.save(self.pyimage_ambos, "./cameraImages/ambasNoDistortV1.png")
             except openvr.error_code.TrackedCameraError as e:
@@ -45,10 +45,12 @@ class VRSAM:
         glfw.window_hint(glfw.SAMPLES, 4)
         self.window = glfw.create_window(1, 1, 'hello_vr', None, None)   
         vr_sys = openvr.VRSystem()
+        self.left_eye_texture = None
+        self.right_eye_texture = None
         
-    def doOpenGLStuff(self, q):
+    def doOpenGLStuff(self):
         #OpenGL stuff
-        glfw.make_context_current(self.window) 
+        
         if self.pyimage_ambos:
             img_data = pg.image.tostring(self.pyimage_ambos, "RGBA")
             img_data_izq, img_data_der = img_data[:len(img_data)//2], img_data[len(img_data)//2:]
@@ -68,7 +70,6 @@ class VRSAM:
                     eType=openvr.TextureType_OpenGL,
                     eColorSpace=openvr.ColorSpace_Gamma,
                 )
-            q.put(self.left_eye_texture)
             glBindTexture(GL_TEXTURE_2D, textures[1])
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
@@ -85,20 +86,19 @@ class VRSAM:
                         eType=openvr.TextureType_OpenGL,
                         eColorSpace=openvr.ColorSpace_Gamma,
                 )
-            q.put(self.right_eye_texture)
         
-    def beginSubmit(self, q):
+    def beginSubmit(self):
         poses = []
         while not glfw.window_should_close(self.window):
-            try:
-                self.left_eye_texture = q.get()
-                self.right_eye_texture = q.get()
-                openvr.VRCompositor().submit(openvr.Eye_Left, self.left_eye_texture)
-                openvr.VRCompositor().submit(openvr.Eye_Right, self.right_eye_texture)
-            except openvr.error_code.CompositorError_DoNotHaveFocus:
-                pass  # First frame fails because waitGetPoses has not been called yet
+            if self.right_eye_texture is not None and self.left_eye_texture is not None:
+                try:
+                    openvr.VRCompositor().submit(openvr.Eye_Left, self.left_eye_texture)
+                    openvr.VRCompositor().submit(openvr.Eye_Right, self.right_eye_texture)
+                    print("Images sent")
+                except openvr.error_code.CompositorError_DoNotHaveFocus:
+                    pass  # First frame fails because waitGetPoses has not been called yet
         
-            poses, _ = openvr.VRCompositor().waitGetPoses(poses, None)
+                poses, _ = openvr.VRCompositor().waitGetPoses(poses, None)
         
         
         
@@ -106,13 +106,12 @@ class VRSAM:
 
 if __name__ == "__main__":
    
-    q = queue.Queue()
     vrsam = VRSAM()
     vrsam.initCamera()
     vrsam.initSubmit()
     
-    pr1 = threading.Thread(target=vrsam.startCameraRecording, args=(q,))
-    pr2 = threading.Thread(target=vrsam.beginSubmit, args=(q,))
+    pr1 = threading.Thread(target=vrsam.startCameraRecording)
+    pr2 = threading.Thread(target=vrsam.beginSubmit)
     pr1.start()
     pr2.start()
     
